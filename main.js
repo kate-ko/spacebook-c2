@@ -1,5 +1,6 @@
 var SpacebookApp = function () {
   return {
+    /* Structure of posts array
     posts: [
       {
         text: "Hello world", id: 1, comments: [
@@ -7,22 +8,18 @@ var SpacebookApp = function () {
           { text: "Man, this is a comment!" },
           { text: "Man, this is a comment!" }
         ]
-      },
-      {
-        text: "Hello world", id: 2, comments: [
-          { text: "Man, this is a comment!" },
-          { text: "Man, this is a comment!" },
-          { text: "Man, this is a comment!" }
-        ]
-      },
-      {
-        text: "Hello world", id: 3, comments: [
-          { text: "Man, this is a comment!" },
-          { text: "Man, this is a comment!" },
-          { text: "Man, this is a comment!" }
-        ]
       }
-    ],
+    ],*/
+
+    STORAGE_ID : 'spacebook',
+
+    saveToLocalStorage: function () {
+      localStorage.setItem(this.STORAGE_ID, JSON.stringify(this.posts));
+    },
+
+    getFromLocalStorage: function () {
+      this.posts = JSON.parse(localStorage.getItem(this.STORAGE_ID) || '[]');
+    },
 
     // the current id to assign to a post
     currentId: 4,
@@ -44,12 +41,13 @@ var SpacebookApp = function () {
       }
 
       this.currentId += 1;
-
       this.posts.push(post);
+      this.saveToLocalStorage();
     },
 
     renderPosts: function () {
       this.$posts.empty();
+      this.getFromLocalStorage();
 
       for (var i = 0; i < this.posts.length; i += 1) {
         var post = this.posts[i];
@@ -69,6 +67,7 @@ var SpacebookApp = function () {
     removePost: function (postID) {
       var post = this._findPostById(postID);
       this.posts.splice(this.posts.indexOf(post), 1);
+      this.saveToLocalStorage();
     },
 
     toggleComments: function (currentPost) {
@@ -82,15 +81,18 @@ var SpacebookApp = function () {
   
       // pushing the comment into the correct posts array
       this._findPostById(postID).comments.push(comment);
+      this.saveToLocalStorage();
     },
 
     removeComment: function (commentIndex, postID) {
       // remove the comment from the comments array on the correct post object
       this._findPostById(postID).comments.splice(commentIndex, 1); 
+      this.saveToLocalStorage();
     },
 
     getCommentsHTML: function (post) {
       let str = "<ul>";
+      console.log(post.comments);
       for (let comment of post.comments){
         str+='<li class="comment">' + comment.text +
           '<button class="btn btn-danger btn-sm remove-comment">Remove Comment</button>' +
@@ -102,7 +104,11 @@ var SpacebookApp = function () {
   };
 }
 
+
+
 var app = SpacebookApp();
+
+
 
 // immediately invoke the render method
 app.renderPosts();
