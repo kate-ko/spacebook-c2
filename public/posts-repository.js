@@ -3,7 +3,7 @@
  */
 class PostsRepository {
     constructor() {
-       this.posts = []
+        this.posts = []
     }
 
     addPost(newPost) {
@@ -30,13 +30,16 @@ class PostsRepository {
                 url: url,
                 data: data,
                 dataType: "json"
+            }).catch(function(error) {
+                console.log(error.data);
             })
         }
 
         return $.ajax({
             method: method,
             url: url,
-            dataType: "json"
+        }).catch(function(error) {
+            console.log(error.data);
         })
     }
 }
