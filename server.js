@@ -4,9 +4,10 @@ const path = require('path')
 
 const SERVER_PORT = 8080;
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/spacebookDB', function () {
+mongoose.connect(process.env.CONNECTION_STRING||'mongodb://localhost/spacebookDB',
+function () {
   console.log("DB connection established!!!");
-})
+});
 
 var app = express();
 const api = require('./server/routes/api')
@@ -16,9 +17,7 @@ app.use(express.static('models'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use('/', api)
-app.listen(SERVER_PORT, () => {
-  console.log("Server started on port " + SERVER_PORT);
-})
+app.listen(process.env.PORT || SERVER_PORT);
 
 
 
