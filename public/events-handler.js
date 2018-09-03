@@ -3,11 +3,9 @@ class EventsHandler {
         this.postsRepository = postsRepository;
         this.postsRenderer = postsRenderer;
         this.$posts = $(".posts");
-        
-        // Getting posts from DB for the first time 
-        this.postsRepository.funcAjax('GET','\posts').then((data)=>{
+        this.postsRepository.funcAjax('GET', '\posts').then((data) => {
             this.postsRepository.posts = data;
-            this.postsRenderer.renderPosts( postsRepository.posts )
+            this.postsRenderer.renderPosts(postsRepository.posts);
         });
     }
 
@@ -18,11 +16,12 @@ class EventsHandler {
             if ($input.val() === "") {
                 alert("Please enter text!");
             } else {
-                this.postsRepository.funcAjax("POST", "/add-new-post", { text: $input.val() }).then((data) => {
-                    this.postsRepository.addPost(data);
-                    this.postsRenderer.renderPosts(this.postsRepository.posts);
-                })
-                $input.val("");
+                this.postsRepository.funcAjax("POST", "/add-new-post",
+                    { text: $input.val() }).then((data) => {
+                        this.postsRepository.addPost(data);
+                        this.postsRenderer.renderPosts(this.postsRepository.posts);
+                        $input.val("");
+                    })
             }
         });
     }
@@ -31,12 +30,12 @@ class EventsHandler {
         this.$posts.on('click', '.remove-post', (event) => {
             let index = $(event.currentTarget).closest('.post').index();
             let id = $(event.currentTarget).closest('.post').data().id;
-
-            this.postsRepository.removePost(index);
-            this.postsRenderer.renderPosts(this.postsRepository.posts);
-
             let url = '/remove-post/' + id
-            this.postsRepository.funcAjax('DELETE', url)
+
+            this.postsRepository.funcAjax('DELETE', url).then((data) => {
+                this.postsRepository.removePost(index);
+                this.postsRenderer.renderPosts(this.postsRepository.posts);
+            })
         });
 
     }
@@ -60,35 +59,31 @@ class EventsHandler {
 
             let postIndex = $(event.currentTarget).closest('.post').index();
             let postId = $(event.currentTarget).closest('.post').data().id;
-
             let newComment = { text: $comment.val(), user: $user.val() };
             let url = '/posts/' + postId + '/add-comment';
 
             this.postsRepository.funcAjax("POST", url, newComment).then((data) => {
                 this.postsRepository.addComment(data, postIndex);
                 this.postsRenderer.renderComments(this.postsRepository.posts, postIndex);
+                $comment.val("");
+                $user.val("");
             })
-
-            $comment.val("");
-            $user.val("");
         });
 
     }
 
     registerRemoveComment() {
         this.$posts.on('click', '.remove-comment', (event) => {
-            let $commentsList = $(event.currentTarget).closest('.post').find('.comments-list');
-
             let postIndex = $(event.currentTarget).closest('.post').index();
             let postId = $(event.currentTarget).closest('.post').data().id;
             let commentIndex = $(event.currentTarget).closest('.comment').index();
             let commentId = $(event.currentTarget).closest('.comment').data().id;
 
-            this.postsRepository.deleteComment(postIndex, commentIndex);
-            this.postsRenderer.renderComments(this.postsRepository.posts, postIndex);
-
             let url = '/posts/' + postId + '/remove-comment/' + commentId
-            this.postsRepository.funcAjax('DELETE', url)
+            this.postsRepository.funcAjax('DELETE', url).then((data) => {
+                this.postsRepository.deleteComment(postIndex, commentIndex);
+                this.postsRenderer.renderComments(this.postsRepository.posts, postIndex);
+            });
         });
     }
 }
